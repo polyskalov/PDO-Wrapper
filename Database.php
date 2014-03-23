@@ -131,6 +131,7 @@ class Database extends PDO {
 	 * insert
 	 * @param string $table A name of table to insert into
 	 * @param string $data An associative array
+	 * @return integer ID of inserted record
 	 */
 	public function insert($table, $data) {
 		ksort($data);
@@ -142,7 +143,9 @@ class Database extends PDO {
 
 		$this->bind($sth, $data);
 
-		return $sth->execute();
+		$sth->execute();
+
+		return $sth->lastInsertId();
 	}
 
 	/**
@@ -177,13 +180,15 @@ class Database extends PDO {
 	 */
 	public function delete($table, $limit = 1, $allowRemoveAll = false) {
 
-		if(empty(self::$where) and !$allowRemoveAll) throw new Exception('You must use "where" to delete record, or set third parameter to "true", if you want to delete all records');
+		if(empty(self::$where) and !$allowRemoveAll) {
+			throw new Exception('You must use "where" to delete record, or set third parameter to "true", if you want to delete all records');
+		} else {
+			$sth = $this->prepare("DELETE FROM $table" . self::_where() . "LIMIT $limit");
 
-		$sth = $this->prepare("DELETE FROM $table" . self::_where() . "LIMIT $limit");
+			$sth->execute();
 
-		$sth->execute();
-
-		return $sth->rowCount();
+			return $sth->rowCount();
+		}
 	}
 
 	/**

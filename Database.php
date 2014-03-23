@@ -50,7 +50,7 @@ class Database extends PDO {
 	 * @param constant $fetchMode A PDO Fetch mode
 	 * @return mixed
 	 */
-	public function pselect($table, $fields = '*') {
+	public function select($table, $fields = '*') {
 
 		if( is_array($fields) ) {
 			$fields = implode(', ', $fields);

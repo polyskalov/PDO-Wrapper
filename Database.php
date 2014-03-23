@@ -50,10 +50,13 @@ class Database extends PDO {
 	 * @param constant $fetchMode A PDO Fetch mode
 	 * @return mixed
 	 */
-	public function select($sql, $bind = array()) {
-		$sth = $this->prepare($sql);
+	public function pselect($table, $fields = '*') {
 
-		$this->bind($sth, $bind);
+		if( is_array($fields) ) {
+			$fields = implode(', ', $fields);
+		}
+
+		$sth = $this->prepare("select $fields from $table");
 
 		$sth->execute();
 
@@ -67,10 +70,13 @@ class Database extends PDO {
 	 * @param constant $fetchMode A PDO Fetch mode
 	 * @return mixed
 	 */
-	public function single($sql, $bind = array()) {
-		$sth = $this->prepare($sql);
+	public function single($table, $fields = '*') {
 
-		$this->bind($sth, $bind);
+		if( is_array($fields) ) {
+			$fields = implode(', ', $fields);
+		}
+
+		$sth = $this->prepare("select $fields from $table limit 1");
 
 		$sth->execute();
 

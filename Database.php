@@ -4,6 +4,8 @@ class Database extends PDO {
 
 	protected static $_instance;
 
+	protected static $where;
+
 	private function __clone() { }
 
 	public static function getInstance() {
@@ -44,6 +46,48 @@ class Database extends PDO {
 	}
 
 	/**
+	 * Bind values
+	 * @param  PDOStatement $sth   PDO Object
+	 * @param  fields       $array Array to bind
+	 * @return [type]              [description]
+	 */
+	private function bind(PDOStatement $sth, $fields = array()) {
+		foreach ($fields as $key => $value) {
+
+			if (is_int($value)) {
+
+				$valueType = PDO::PARAM_INT;
+			} elseif(is_bool($value)) {
+
+				$valueType = PDO::PARAM_BOOL;
+			} else {
+
+				$valueType = PDO::PARAM_STR;
+			}
+
+			$sth->bindValue($key, $value, $valueType);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Return where condition as part of sql query
+	 * @return string Where part of sql query
+	 */
+	private static function _where() {
+		if( !empty(self::$where) ) {
+
+			$where = self::$where;
+
+			// reset where
+			self::$where = null;
+
+			return ' WHERE ' . $where;
+		}
+	}
+
+	/**
 	 * Select
 	 * @param string $sql An SQL string
 	 * @param array $array Paramters to bind
@@ -56,7 +100,7 @@ class Database extends PDO {
 			$fields = implode(', ', $fields);
 		}
 
-		$sth = $this->prepare("select $fields from $table");
+		$sth = $this->prepare("select $fields from `$table`" . self::_where());
 
 		$sth->execute();
 
@@ -76,7 +120,7 @@ class Database extends PDO {
 			$fields = implode(', ', $fields);
 		}
 
-		$sth = $this->prepare("select $fields from $table limit 1");
+		$sth = $this->prepare("select $fields from $table " . self::_where() . " limit 1");
 
 		$sth->execute();
 
@@ -105,34 +149,41 @@ class Database extends PDO {
 	 * Update
 	 * @param string $table A name of table to insert into
 	 * @param string $data An associative array
-	 * @param string $where the WHERE query part
 	 */
-	public function update($table, $data, $where) {
+	public function update($table, $data) {
 		ksort($data);
 
 		$fieldDetails = NULL;
-		foreach($data as $key=> $value) {
+		foreach($data as $key => $value) {
 			$fieldDetails .= "`$key`=:$key,";
 		}
 		$fieldDetails = rtrim($fieldDetails, ',');
 
-		$sth = $this->prepare("UPDATE $table SET $fieldDetails WHERE $where");
+		$sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_where());
 
-		$this->bind($sth, $bind);
+		$this->bind($sth, $data);
 
 		$sth->execute();
+
+		return $sth->rowCount();
 	}
 
 	/**
 	 * Delete
 	 * @param string $table
-	 * @param string $where
 	 * @param integer $limit
+	 * @param boolean $allowRemoveAll Allow removing all records from table, if "where" not used
 	 * @return integer Affected Rows
 	 */
-	public function delete($table, $where, $limit = 1) {
-		return $this->exec("DELETE FROM $table WHERE $where LIMIT $limit");
-		//$sth->rowCount()
+	public function delete($table, $limit = 1, $allowRemoveAll = false) {
+
+		if(empty(self::$where) and !$allowRemoveAll) throw new Exception('You must use "where" to delete record, or set third parameter to "true", if you want to delete all records');
+
+		$sth = $this->prepare("DELETE FROM $table" . self::_where() . "LIMIT $limit");
+
+		$sth->execute();
+
+		return $sth->rowCount();
 	}
 
 	/**
@@ -142,10 +193,8 @@ class Database extends PDO {
 	 * @param  array  $bind  [description]
 	 * @return [type]        [description]
 	 */
-	public function count($table, $where = '', $bind=array()) {
-		$sth = $this->prepare("select count(*) from `$table`" . ($where? ' where '.$where: ''). ';');
-
-		$this->bind($sth, $bind);
+	public function count($table) {
+		$sth = $this->prepare("select count(*) from `$table`" . self::_where(). ';');
 
 		$sth->execute();
 
@@ -153,27 +202,12 @@ class Database extends PDO {
 	}
 
 	/**
-	 * Bind values
-	 * @param  PDOStatement $sth   PDO Object
-	 * @param  fields       $array Array to bind
-	 * @return [type]              [description]
+	 * Add where into query
+	 * @param  string $condition sql like condition
+	 * @return self
 	 */
-	private function bind(PDOStatement $sth, $fields = array()) {
-		foreach ($fields as $key => $value) {
-
-			if (is_int($value)) {
-
-				$valueType = PDO::PARAM_INT;
-			} elseif(is_bool($value)) {
-
-				$valueType = PDO::PARAM_BOOL;
-			} else {
-
-				$valueType = PDO::PARAM_STR;
-			}
-
-			$sth->bindValue($key, $value, $valueType);
-		}
+	public function where($condition) {
+		self::$where = $condition;
 
 		return $this;
 	}

@@ -3,9 +3,6 @@
 class Database extends PDO {
 
 	protected static $_instance;
-
-	protected static $where;
-
 	private function __clone() { }
 
 	public static function getInstance() {
@@ -18,12 +15,19 @@ class Database extends PDO {
 	}
 
 	/**
+	 * Where condition
+	 * @var string
+	 */
+	protected static $where;
+
+	/**
 	 * Initialization and connecting
-	 * @param string $dbName   Name of your database
+	 * @param mixed  $db       Name of your database or connection parameters as associative array
 	 * @param string $user     Username
 	 * @param string $password Password
 	 * @param string $host     Database server
 	 * @param string $dbType   Type of a base (mysql, ms sql and maybe other)
+	 * @return null
 	 */
 	public function __construct($db, $user = 'root', $password = '', $host = 'localhost', $dbType = 'mysql') {
 
@@ -47,9 +51,9 @@ class Database extends PDO {
 
 	/**
 	 * Bind values
-	 * @param  PDOStatement $sth   PDO Object
-	 * @param  fields       $array Array to bind
-	 * @return [type]              [description]
+	 * @param  PDOStatement $sth    PDO Object
+	 * @param  array        $fields Array to bind
+	 * @return self
 	 */
 	private function bind(PDOStatement $sth, $fields = array()) {
 		foreach ($fields as $key => $value) {
@@ -89,10 +93,9 @@ class Database extends PDO {
 
 	/**
 	 * Select
-	 * @param string $sql An SQL string
-	 * @param array $array Paramters to bind
-	 * @param constant $fetchMode A PDO Fetch mode
-	 * @return mixed
+	 * @param  string $table  Table
+	 * @param  mixed  $fields String or array of fields you want to select
+	 * @return array  Result as associative array
 	 */
 	public function select($table, $fields = '*') {
 
@@ -109,10 +112,9 @@ class Database extends PDO {
 
 	/**
 	 * Select single row
-	 * @param string $sql An SQL string
-	 * @param array $array Paramters to bind
-	 * @param constant $fetchMode A PDO Fetch mode
-	 * @return mixed
+	 * @param  string $table  Table
+	 * @param  mixed  $fields String or array of fields you want to select
+	 * @return array  Result as associative array
 	 */
 	public function single($table, $fields = '*') {
 
@@ -128,9 +130,9 @@ class Database extends PDO {
 	}
 
 	/**
-	 * insert
-	 * @param string $table A name of table to insert into
-	 * @param string $data An associative array
+	 * Insert
+	 * @param  string  $table  A name of table to insert into
+	 * @param  string  $data   An associative array with data
 	 * @return integer ID of inserted record
 	 */
 	public function insert($table, $data) {
@@ -151,7 +153,7 @@ class Database extends PDO {
 	/**
 	 * Update
 	 * @param string $table A name of table to insert into
-	 * @param string $data An associative array
+	 * @param string $data  An associative array with data
 	 */
 	public function update($table, $data) {
 		ksort($data);
@@ -173,9 +175,9 @@ class Database extends PDO {
 
 	/**
 	 * Delete
-	 * @param string $table
-	 * @param integer $limit
-	 * @param boolean $allowRemoveAll Allow removing all records from table, if "where" not used
+	 * @param  string  $table          Table to remove from
+	 * @param  integer $limit          Limit deletions
+	 * @param  boolean $allowRemoveAll Allow removing all records from table, if "where" not used
 	 * @return integer Affected Rows
 	 */
 	public function delete($table, $limit = 1, $allowRemoveAll = false) {
@@ -193,10 +195,8 @@ class Database extends PDO {
 
 	/**
 	 * Get count of rows
-	 * @param  string $table [description]
-	 * @param  string $where [description]
-	 * @param  array  $bind  [description]
-	 * @return [type]        [description]
+	 * @param  string  $table Table
+	 * @return integer Count rows
 	 */
 	public function count($table) {
 		$sth = $this->prepare("select count(*) from `$table`" . self::_where(). ';');

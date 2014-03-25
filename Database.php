@@ -41,10 +41,7 @@ class Database extends PDO {
 			$dbName = $db;
 		}
 
-		parent::__construct("$dbType:host=$host;dbname=$dbName;charset=UTF8",
-			$user,
-			$password
-		);
+		parent::__construct("$dbType:host=$host;dbname=$dbName;charset=utf8", $user, $password);
 
 		parent::setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
@@ -93,17 +90,21 @@ class Database extends PDO {
 
 	/**
 	 * Select
-	 * @param  string $table  Table
+	 * @param  mixed  $tables  Needed table (as string) or tables (as array)
 	 * @param  mixed  $fields String or array of fields you want to select
 	 * @return array  Result as associative array
 	 */
-	public function select($table, $fields = '*') {
+	public function select($tables, $fields = '*') {
+
+		if( is_array($tables) ) {
+			$tables = implode('`, `', $tables);
+		}
 
 		if( is_array($fields) ) {
 			$fields = implode(', ', $fields);
 		}
 
-		$sth = $this->prepare("select $fields from `$table`" . self::_where());
+		$sth = $this->prepare("select $fields from `$tables`" . self::_where());
 
 		$sth->execute();
 

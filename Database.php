@@ -209,11 +209,25 @@ class Database extends PDO {
 
 	/**
 	 * Add where into query
-	 * @param  string $condition sql like condition
+	 * @param  mixed  $condition sql like condition as string or associative array
+	 * @param  string $operator  Operator for arrays of conditions
 	 * @return self
 	 */
-	public function where($condition) {
-		self::$where = $condition;
+	public function where($conditions, $operator = 'and') {
+
+		if( is_array($conditions) ) {
+
+			$conditions_array = $conditions;
+			$conditions = '';
+
+			$end = end($conditions_array);
+
+			foreach ($conditions_array as $key => $value) {
+				$conditions .= "`$key`='$value' ".($end != $value? $operator:'');
+			}
+		}
+
+		self::$where = $conditions;
 
 		return $this;
 	}

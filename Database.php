@@ -32,11 +32,11 @@ class Database extends PDO {
 	public function __construct($db, $user = 'root', $password = '', $host = 'localhost', $dbType = 'mysql') {
 
 		if(is_array($db)) {
-			$user = $db['user'];
-			$password = $db['password'];
-			$host = $db['host'];
-			$dbType = $db['type'];
-			$dbName = $db['dbname'];
+			if(!empty( $db['user'] )) $user = $db['user'];
+			if(!empty( $db['password'] )) $password = $db['password'];
+			if(!empty( $db['host'] )) $host = $db['host'];
+			if(!empty( $db['type'] )) $dbType = $db['type'];
+			if(!empty( $db['dbname'] )) $dbName = $db['dbname'];
 		} else {
 			$dbName = $db;
 		}

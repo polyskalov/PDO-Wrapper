@@ -3,6 +3,7 @@
 class Database extends PDO {
 
 	protected static $_instance;
+	protected static $_sth;
 	private function __clone() { }
 
 	public static function getInstance() {
@@ -52,7 +53,7 @@ class Database extends PDO {
 	 * @param  array        $fields Array to bind
 	 * @return self
 	 */
-	private function bind(PDOStatement $sth, $fields = array()) {
+	private function bind($fields = array()) {
 		foreach ($fields as $key => $value) {
 
 			if (is_int($value)) {
@@ -66,7 +67,7 @@ class Database extends PDO {
 				$valueType = PDO::PARAM_STR;
 			}
 
-			$sth->bindValue($key, $value, $valueType);
+			$this->_sth->bindValue($key, $value, $valueType);
 		}
 
 		return $this;
@@ -104,11 +105,11 @@ class Database extends PDO {
 			$fields = implode(', ', $fields);
 		}
 
-		$sth = $this->prepare("select $fields from `$tables`" . self::_where());
+		$this->_sth = $this->prepare("select $fields from `$tables`" . self::_where());
 
-		$sth->execute();
+		$this->_sth->execute();
 
-		return $sth->fetchAll(PDO::FETCH_ASSOC);
+		return $this->_sth->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	/**
@@ -123,11 +124,11 @@ class Database extends PDO {
 			$fields = implode(', ', $fields);
 		}
 
-		$sth = $this->prepare("select $fields from $table " . self::_where() . " limit 1");
+		$this->_sth = $this->prepare("select $fields from $table " . self::_where() . " limit 1");
 
-		$sth->execute();
+		$this->_sth->execute();
 
-		return $sth->fetch(PDO::FETCH_ASSOC);
+		return $this->_sth->fetch(PDO::FETCH_ASSOC);
 	}
 
 	/**
@@ -142,13 +143,13 @@ class Database extends PDO {
 		$fieldNames = implode('`, `', array_keys($data));
 		$fieldValues = ':' . implode(', :', array_keys($data));
 
-		$sth = $this->prepare("INSERT INTO $table (`$fieldNames`) VALUES ($fieldValues)");
+		$this->_sth = $this->prepare("INSERT INTO $table (`$fieldNames`) VALUES ($fieldValues)");
 
-		$this->bind($sth, $data);
+		$this->bind($data);
 
-		$sth->execute();
+		$this->_sth->execute();
 
-		return $sth->lastInsertId();
+		return $this->_sth->lastInsertId();
 	}
 
 	/**
@@ -165,13 +166,13 @@ class Database extends PDO {
 		}
 		$fieldDetails = rtrim($fieldDetails, ',');
 
-		$sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_where());
+		$this->_sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_where());
 
-		$this->bind($sth, $data);
+		$this->bind($data);
 
-		$sth->execute();
+		$this->_sth->execute();
 
-		return $sth->rowCount();
+		return $this->_sth->rowCount();
 	}
 
 	/**
@@ -186,11 +187,11 @@ class Database extends PDO {
 		if(empty(self::$where) and !$allowRemoveAll) {
 			throw new Exception('You must use "where" to delete record, or set third parameter to "true", if you want to delete all records');
 		} else {
-			$sth = $this->prepare("DELETE FROM $table" . self::_where() . "LIMIT $limit");
+			$this->_sth = $this->prepare("DELETE FROM $table" . self::_where() . "LIMIT $limit");
 
-			$sth->execute();
+			$this->_sth->execute();
 
-			return $sth->rowCount();
+			return $this->_sth->rowCount();
 		}
 	}
 
@@ -200,11 +201,11 @@ class Database extends PDO {
 	 * @return integer Count rows
 	 */
 	public function count($table) {
-		$sth = $this->prepare("select count(*) from `$table`" . self::_where(). ';');
+		$this->_sth = $this->prepare("select count(*) from `$table`" . self::_where(). ';');
 
-		$sth->execute();
+		$this->_sth->execute();
 
-		return intval($sth->fetchColumn());
+		return intval($this->_sth->fetchColumn());
 	}
 
 	/**

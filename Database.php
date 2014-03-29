@@ -215,7 +215,8 @@ class Database extends PDO {
 	 * @return PDOObject        PDO Instance
 	 */
 	public function exec($sql, $bind = array()) {
-		$this->_sth->prepare($sql);
+
+		$this->_sth = $this->prepare($sql);
 
 		$this->bind($bind);
 

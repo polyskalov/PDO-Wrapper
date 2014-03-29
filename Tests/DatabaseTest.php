@@ -8,7 +8,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	private $db;
 
 	public function setUp() {
-		$this->db = new Database($GLOBALS['db_dbname'], $GLOBALS['db_username'], $GLOBALS['db_password'], $GLOBALS['host']);
+		$this->db = new Database($GLOBALS['db_dbname'], $GLOBALS['db_username'], $GLOBALS['db_password'], $GLOBALS['db_host']);
 		$this->db->exec("CREATE TABLE IF NOT EXISTS `userstest` (`id` int(11) NOT NULL AUTO_INCREMENT,`login` varchar(50) NOT NULL, `password` varchar(100) NOT NULL,`activated` tinyint(1) NOT NULL,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
 		$this->db->exec("INSERT INTO `userstest` (`login`, `password`, `activated`) VALUES ('root', '7c6a180b36896a0a8c02787eeafb0e4c', 1), ('admin', '6cb75f652a9b52798eb6cf2201057c73', 1), ('polyskalov', '819b0643d6b89dc9b579fdfc9094f28e', 0);");

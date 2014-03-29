@@ -209,6 +209,20 @@ class Database extends PDO {
 	}
 
 	/**
+	 * Just execute some request
+	 * @param  string    $sql   SQL query
+	 * @param  array     $bind  Bind parameters
+	 * @return PDOObject        PDO Instance
+	 */
+	public function exec($sql, $bind = array()) {
+		$this->_sth->prepare($sql);
+
+		$this->bind($bind);
+
+		return $this->_sth->execute();
+	}
+
+	/**
 	 * Add where into query
 	 * @param  mixed  $condition sql like condition as string or associative array
 	 * @param  string $operator  Operator for arrays of conditions

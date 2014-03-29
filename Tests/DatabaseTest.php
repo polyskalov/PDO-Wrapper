@@ -16,7 +16,9 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function tearDown() {
-		$this->db->exec("DROP TABLE `userstest`");
+		if($this->db) {
+			$this->db->exec("DROP TABLE `userstest`");
+		}
 	}
 
 	public function testSelect() {

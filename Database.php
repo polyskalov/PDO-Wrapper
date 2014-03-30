@@ -15,6 +15,10 @@ class Database extends PDO {
 		return self::$_instance;
 	}
 
+	public $pdo_attributes = array(
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+	);
+
 	/**
 	 * Where condition
 	 * @var string
@@ -42,9 +46,7 @@ class Database extends PDO {
 			$dbName = $db;
 		}
 
-		parent::__construct("$dbType:host=$host;dbname=$dbName;charset=utf8", $user, $password);
-
-		parent::setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		parent::__construct("$dbType:host=$host;dbname=$dbName;charset=utf8", $user, $password, $this->pdo_attributes);
 	}
 
 	/**

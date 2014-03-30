@@ -16,7 +16,8 @@ class Database extends PDO {
 	}
 
 	public $pdo_attributes = array(
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
 	);
 
 	/**
@@ -111,7 +112,7 @@ class Database extends PDO {
 
 		$this->_sth->execute();
 
-		return $this->_sth->fetchAll(PDO::FETCH_ASSOC);
+		return $this->_sth->fetchAll();
 	}
 
 	/**
@@ -130,7 +131,7 @@ class Database extends PDO {
 
 		$this->_sth->execute();
 
-		return $this->_sth->fetch(PDO::FETCH_ASSOC);
+		return $this->_sth->fetch();
 	}
 
 	/**

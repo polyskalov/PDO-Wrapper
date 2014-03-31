@@ -22,10 +22,12 @@ class Database extends PDO {
 	);
 
 	/**
-	 * Where condition
-	 * @var string
+	 * Extra conditions
+	 * @var array
 	 */
-	protected static $where;
+	protected static $extra = array(
+		'where' => ''
+	);
 
 	/**
 	 * Initialization and connecting
@@ -78,19 +80,21 @@ class Database extends PDO {
 	}
 
 	/**
-	 * Return where condition as part of sql query
-	 * @return string Where part of sql query
+	 * Return extra parameters (where, limit, etc..) as part of sql query
+	 * @return string  Part of sql query
 	 */
-	private static function _where() {
-		if( !empty(self::$where) ) {
+	private static function _extra() {
+		$where = '';
 
-			$where = self::$where;
+		if( !empty(self::$extra['where']) ) {
+
+			$where = ' WHERE ' . self::$extra['where'];
 
 			// reset where
-			self::$where = null;
-
-			return ' WHERE ' . $where;
+			self::$extra['where'] = null;
 		}
+
+		return ' ' . $where . ' ';
 	}
 
 	/**
@@ -109,7 +113,7 @@ class Database extends PDO {
 			$fields = implode(', ', $fields);
 		}
 
-		$this->_sth = $this->prepare("select $fields from `$tables`" . self::_where());
+		$this->_sth = $this->prepare("select $fields from `$tables`" . self::_extra());
 
 		$this->_sth->execute();
 
@@ -128,7 +132,7 @@ class Database extends PDO {
 			$fields = implode(', ', $fields);
 		}
 
-		$this->_sth = $this->prepare("select $fields from $table " . self::_where() . " limit 1");
+		$this->_sth = $this->prepare("select $fields from $table " . self::_extra() . " limit 1");
 
 		$this->_sth->execute();
 
@@ -170,7 +174,7 @@ class Database extends PDO {
 		}
 		$fieldDetails = rtrim($fieldDetails, ',');
 
-		$this->_sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_where());
+		$this->_sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_extra());
 
 		$this->bind($data);
 
@@ -188,10 +192,10 @@ class Database extends PDO {
 	 */
 	public function delete($table, $limit = 1, $allowRemoveAll = false) {
 
-		if(empty(self::$where) and !$allowRemoveAll) {
+		if(empty(self::$extra['where']) and !$allowRemoveAll) {
 			throw new Exception('You must use "where" to delete record, or set third parameter to "true", if you want to delete all records');
 		} else {
-			$this->_sth = $this->prepare("DELETE FROM $table" . self::_where() . "LIMIT $limit");
+			$this->_sth = $this->prepare("DELETE FROM $table" . self::_extra() . "LIMIT $limit");
 
 			$this->_sth->execute();
 
@@ -205,7 +209,7 @@ class Database extends PDO {
 	 * @return integer Count rows
 	 */
 	public function count($table) {
-		$this->_sth = $this->prepare("select count(*) from `$table`" . self::_where(). ';');
+		$this->_sth = $this->prepare("select count(*) from `$table`" . self::_extra(). ';');
 
 		$this->_sth->execute();
 
@@ -241,7 +245,7 @@ class Database extends PDO {
 			$finalCondition .= "`$condition` $operator $value ";
 		}
 
-		self::$where = $finalCondition;
+		self::$extra['where'] = $finalCondition;
 
 		return $this;
 	}

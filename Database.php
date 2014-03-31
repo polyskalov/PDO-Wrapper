@@ -165,22 +165,27 @@ class Database extends PDO {
 	 * @param string $table A name of table to insert into
 	 * @param string $data  An associative array with data
 	 */
-	public function update($table, $data) {
-		ksort($data);
+	public function update($table, $data, $allowUpdateAll = false) {
+		if(empty(self::$extra['where']) and !$allowUpdateAll) {
+			throw new Exception('For using update you need to specify "where", or set $allowUpdateAll parameter to true if want to update all records');
+		} else {
 
-		$fieldDetails = NULL;
-		foreach($data as $key => $value) {
-			$fieldDetails .= "`$key`=:$key,";
+			ksort($data);
+
+			$fieldDetails = NULL;
+			foreach($data as $key => $value) {
+				$fieldDetails .= "`$key`=:$key,";
+			}
+			$fieldDetails = rtrim($fieldDetails, ',');
+
+			$this->_sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_extra());
+
+			$this->bind($data);
+
+			$this->_sth->execute();
+
+			return $this->_sth->rowCount();
 		}
-		$fieldDetails = rtrim($fieldDetails, ',');
-
-		$this->_sth = $this->prepare("UPDATE $table SET $fieldDetails" . self::_extra());
-
-		$this->bind($data);
-
-		$this->_sth->execute();
-
-		return $this->_sth->rowCount();
 	}
 
 	/**

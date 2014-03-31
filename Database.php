@@ -2,8 +2,8 @@
 
 class Database extends PDO {
 
-	protected static $_instance;
-	protected static $_sth;
+	protected $_instance;
+	protected $_sth;
 	private function __clone() { }
 
 	public static function getInstance() {

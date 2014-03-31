@@ -1,0 +1,20 @@
+{
+	"name": "polyskalov/database",
+	"type": "library",
+	"description": "PDO Wrapper for easy working with databases",
+	"keywords": ["php", "database", "mysql", "PDO"],
+	"homepage": "https://github.com/polyskalov/PDO-Wrapper",
+	"license": "MIT",
+	"authors": [{
+		"name": "Polyskalov",
+		"email": "contact@polyskalov.com",
+		"homepage": "http://polyskalov.com"
+	}],
+	"support": {
+		"issues": "https://github.com/polyskalov/PDO-Wrapper/issues"
+	},
+	"require": {
+		"php": ">=5.1",
+		"ext-pdo": "*"
+	}
+}

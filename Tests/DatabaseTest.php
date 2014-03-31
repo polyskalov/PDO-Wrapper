@@ -21,34 +21,37 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
-	public function testSelect() {
-
-		$users = $this->db->select('userstest');
-
-		$this->assertEquals('polyskalov', $users[2]['login'], 'Select failed! Selected value not equals.');
+	public function inputSelect() {
+		return array(
+			array('id,login'),
+			array(array('id', 'login'))
+		);
 	}
 
-	public function testSelectWithSomeFieldsAsArray() {
+	/**
+	 * @dataProvider inputSelect
+	 */
+	public function testSelect($fields) {
 
-		$users = $this->db->select('userstest', array('id', 'login') );
+		$users = $this->db->select('userstest', $fields);
 
-		$this->assertEquals('polyskalov', $users[2]['login'], 'Select with fields defined by array failed! Selected value not equals.');
-		$this->assertNull($users[2]['password'], 'Select with fields defined by array failed! Field not listed in params are axists');
+		$this->assertArrayHasKey('login', $users[2], 'Needed field is not exists in response');
+		$this->assertArrayNotHasKey('password', $users[2], 'The response contains not declared field');
+
+		$this->assertEquals('polyskalov', $users[2]['login'], 'Selected wrong value');
 	}
 
-	public function testSelectWithSomeFieldsAsString() {
+	/**
+	 * @dataProvider inputSelect
+	 */
+	public function testSingle($fields) {
 
-		$users = $this->db->select('userstest', 'id,login');
+		$user = $this->db->single('userstest', $fields);
 
-		$this->assertEquals('polyskalov', $users[2]['login'], 'Select with fields defined by array failed! Selected value not equals.');
-		$this->assertNull($users[2]['password'], 'Select with fields defined by array failed! Field not listed in params are axists');
+		$this->assertArrayHasKey('login', $user, 'Needed field is not exists in response');
+		$this->assertArrayNotHasKey('password', $user, 'The response contains not declared field');
 
+		$this->assertEquals('root', $user['login'], 'Selected wrong value');
 	}
 
-	public function testSingle() {
-
-		$user = $this->db->single('userstest', 'id,login');
-
-		$this->assertEquals('root', $user['login'], 'Select single failed! Needed value not exuals');
-	}
 }

@@ -54,4 +54,15 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('root', $user['login'], 'Selected wrong value');
 	}
 
+
+	public function testInsert() {
+
+		$data = array('login' => 'inserted');
+
+		$new_id = $this->db->insert('userstest', $data);
+
+		$user = $this->db->where('id', $new_id)->single('userstest', 'login');
+
+		$this->assertEquals('inserted', $user['login'], 'Returned bad value');
+	}
 }

@@ -157,7 +157,7 @@ class Database extends PDO {
 
 		$this->_sth->execute();
 
-		return $this->lastInsertId();
+		return intval($this->lastInsertId());
 	}
 
 	/**

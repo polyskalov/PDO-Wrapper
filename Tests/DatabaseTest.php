@@ -7,17 +7,19 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	 */
 	private $db;
 
+	private $testedTable = 'userstest';
+
 	public function setUp() {
 		$this->db = new Database($GLOBALS['db_dbname'], $GLOBALS['db_username'], $GLOBALS['db_password'], $GLOBALS['db_host']);
-		$this->db->exec("CREATE TABLE IF NOT EXISTS `userstest` (`id` int(11) NOT NULL AUTO_INCREMENT,`login` varchar(50) NOT NULL, `password` varchar(100) NOT NULL,`activated` tinyint(1) NOT NULL,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+		$this->db->exec("CREATE TABLE IF NOT EXISTS `{$this->testedTable}` (`id` int(11) NOT NULL AUTO_INCREMENT,`login` varchar(50) NOT NULL, `password` varchar(100) NOT NULL,`activated` tinyint(1) NOT NULL,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
-		$this->db->exec("INSERT INTO `userstest` (`login`, `password`, `activated`) VALUES ('root', '7c6a180b36896a0a8c02787eeafb0e4c', 1), ('admin', '6cb75f652a9b52798eb6cf2201057c73', 1), ('polyskalov', '819b0643d6b89dc9b579fdfc9094f28e', 0);");
+		$this->db->exec("INSERT INTO `{$this->testedTable}` (`login`, `password`, `activated`) VALUES ('root', '7c6a180b36896a0a8c02787eeafb0e4c', 1), ('admin', '6cb75f652a9b52798eb6cf2201057c73', 1), ('polyskalov', '819b0643d6b89dc9b579fdfc9094f28e', 0);");
 
 	}
 
 	public function tearDown() {
 		if($this->db) {
-			$this->db->exec("DROP TABLE `userstest`");
+			$this->db->exec("DROP TABLE `{$this->testedTable}`");
 		}
 	}
 
@@ -33,7 +35,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSelect($fields) {
 
-		$users = $this->db->select('userstest', $fields);
+		$users = $this->db->select($this->testedTable, $fields);
 
 		$this->assertArrayHasKey('login', $users[2], 'Needed field is not exists in response');
 		$this->assertArrayNotHasKey('password', $users[2], 'The response contains not declared field');
@@ -46,7 +48,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSingle($fields) {
 
-		$user = $this->db->single('userstest', $fields);
+		$user = $this->db->single($this->testedTable, $fields);
 
 		$this->assertArrayHasKey('login', $user, 'Needed field is not exists in response');
 		$this->assertArrayNotHasKey('password', $user, 'The response contains not declared field');
@@ -59,7 +61,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 
 		$data = array('login' => 'inserted');
 
-		$new_id = $this->db->insert('userstest', $data);
+		$new_id = $this->db->insert($this->testedTable, $data);
 
 		$user = $this->db->where('id', $new_id)->single('userstest', 'login');
 

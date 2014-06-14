@@ -247,7 +247,9 @@ class Database extends PDO {
 		$finalCondition = null;
 
 		if(!empty($value)) {
-			$finalCondition .= "`$condition` $operator $value ";
+			$finalCondition .= "`$condition` $operator '$value' ";
+		} else {
+			$finalCondition = $condition;
 		}
 
 		self::$extra['where'] = $finalCondition;

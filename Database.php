@@ -246,7 +246,7 @@ class Database extends PDO {
 	public function where($condition, $value = null, $operator = '=') {
 		$finalCondition = null;
 
-		if(!empty($value)) {
+		if(isset($value)) {
 			$finalCondition .= "`$condition` $operator '$value' ";
 		} else {
 			$finalCondition = $condition;

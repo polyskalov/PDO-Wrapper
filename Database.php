@@ -143,15 +143,18 @@ class Database extends PDO {
 	 * Insert
 	 * @param  string  $table  A name of table to insert into
 	 * @param  string  $data   An associative array with data
+	 * @param  boolean $ignore Ignore insert of doubles
 	 * @return integer ID of inserted record
 	 */
-	public function insert($table, $data) {
+	public function insert($table, $data, $ignore = false) {
 		ksort($data);
 
 		$fieldNames = implode('`, `', array_keys($data));
 		$fieldValues = ':' . implode(', :', array_keys($data));
 
-		$this->_sth = $this->prepare("INSERT INTO $table (`$fieldNames`) VALUES ($fieldValues)");
+		$isIgnore = ($ignore)? 'IGNORE': '';
+
+		$this->_sth = $this->prepare("INSERT $isIgnore INTO $table (`$fieldNames`) VALUES ($fieldValues)");
 
 		$this->bind($data);
 
